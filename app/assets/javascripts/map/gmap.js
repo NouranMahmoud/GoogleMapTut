@@ -5,7 +5,11 @@ $(window).load(function() {
 var map;
 var poly;
 function initialize() {
-         var mapOptions = {
+        
+        var directionsService = new google.maps.DirectionsService(); 
+        var directionsDisplay = new google.maps.DirectionsRenderer(); 
+  
+  var mapOptions = {
           center: new google.maps.LatLng(30.055487, 31.279766),
           zoom: 8,
           mapTypeId: google.maps.MapTypeId.NORMAL,
@@ -16,223 +20,22 @@ function initialize() {
         };
         // initializing map
         map = new google.maps.Map(document.getElementById("map-canvas"),mapOptions);
-     // trying the drawing liberary
-     var drawingManager = new google.maps.drawing.DrawingManager({
-    drawingMode: null,
-    drawingControl: true,
-    drawingControlOptions: {
-      position: google.maps.ControlPosition.TOP_CENTER,
-      drawingModes: [
-        //google.maps.drawing.OverlayType.MARKER,
-        google.maps.drawing.OverlayType.CIRCLE,
-        google.maps.drawing.OverlayType.POLYGON,
-        google.maps.drawing.OverlayType.POLYLINE,
-        google.maps.drawing.OverlayType.RECTANGLE
-      ]
-    },
-    markerOptions: {
-      icon: "/assets/icon.png"
-    }
-  });
-  drawingManager.setMap(map);
+        directionsDisplay.setMap(map);
+        var request =
+                {
+                        origin: "Mansoura, Daqahlia, Egypt",
+                        destination: "Cairo, Egypt",
+                        travelMode: google.maps.DirectionsTravelMode.DRIVING
+                };
+        directionsService.route(request, function(response, status)
+            {
+                 if (status == google.maps.DirectionsStatus.OK) //Check if request is successful.
+                    {
+                      console.log(status);
+                      directionsDisplay.setDirections(response); //Display the directions result
+                    }
+            });
 }
-
-function HomeControl(controlDiv, map, home) {
- controlDiv.style.padding = '5px';
-  
-  var controlUI = document.createElement('div');
-  controlUI.style.backgroundColor = 'white';
-  controlUI.style.borderStyle = 'solid';
-  controlUI.style.borderWidth = '2px';
-  controlUI.style.cursor = 'pointer';
-  controlUI.style.textAlign = 'center';
-  controlUI.title = 'Click to set the map to fullscreen';
-  controlDiv.appendChild(controlUI);
-
-  var controlText = document.createElement('div');
-  controlText.style.fontFamily = 'Arial,sans-serif';
-  controlText.style.fontSize = '12px';
-  controlText.style.paddingLeft = '4px';
-  controlText.style.paddingRight = '4px';
-  controlText.innerHTML = '<b>Full Screen</b>';
-  controlUI.appendChild(controlText);
-  google.maps.event.addDomListener(controlUI, 'click', function() {
-    $("#map_canvas").toggleClass("fullscreen");
-    google.maps.event.trigger(map , 'resize');
-    console.log("btn clicked");
-    controlText.innerHTML = $("#map_canvas").hasClass("fullscreen")? '<b>Normal Screen</b>':'<b>Full Screen</b>';
-  });
-}
-
-var info;
-function codeLatLng(geocoding){
-
-  var input = $('#search_box_reverse').val();
-  console.log(input);
-  
-  var latlngbounds = new google.maps.LatLngBounds();
-  var listener;
-  var regex = /([1-9])+\.([1-9])+\,([1-9])+\.([1-9])+/g;
-  if(regex.test(input)) {
-  var latLngStr = input.split(",",2);
-  var lat = parseFloat(latLngStr[0]);
-  var lng = parseFloat(latLngStr[1]);
-  var latLng = new google.maps.LatLng(lat, lng);
-  geocoding.geocode({'latLng': latLng}, function(results, status) {
-     if (status == google.maps.GeocoderStatus.OK){
-       if(results.length > 0){
-         //map.setZoom(11);
-         var marker;
-         map.setCenter(results[1].geometry.location);
-         var i;
-        info = createInfoWindow("");
-         for(i in results){
-           latlngbounds.extend(results[i].geometry.location);
-             marker = new google.maps.Marker({
-             map: map,
-             position: results[i].geometry.location
-           });
-          
-          google.maps.event.addListener(marker, 'click', (function(marker,i) {
-            return function() {
-            info.setContent(results[i].formatted_address);
-            info.open(map,marker);
-            }
-          })(marker,i));
-        }
-
-         map.fitBounds(latlngbounds);
-         listener = google.maps.event.addListener(map, "idle", function() {
-          if (map.getZoom() > 16) map.setZoom(16);
-            google.maps.event.removeListener(listener);
-          });
-       }
-     }
-    else{
-       alert("Geocoder failed due to: " + status);
-     }  
-  });
-  }else{
-    alert("Wrong lat,lng format!");
-  }
-}
-function codeAddress(geocoding){
-  var address = $("#search_box_geocoding").val();
-  if(address.length > 0){
-    geocoding.geocode({'address': address},function(results, status){
-      if(status == google.maps.GeocoderStatus.OK){
-        map.setCenter(results[0].geometry.location);
-        var marker  =  new google.maps.Marker({
-          map: map,
-          position: results[0].geometry.location
-        });
-        }else{
-        alert("Geocode was not successful for the following reason: " + status);
-      }
-    });
-  }else{
-    alert("Search field can't be blank");
-  }
-}
-function drawingPolygon(polygonCoords){
-    var polygone = new google.maps.Polygon({
-    paths: polygonCoords,
-    strokeColor: '#FF00FF',
-    strokeOpacity: 0.8,
-    strokeWeight: 2,
-    fillColor: '#FF0000',
-    fillOpacity: 0.35,
-    draggable:true,
-    editable: true
-  });
-  polygone.setMap(map);
-}
-function animateCircle() {
-    var count = 0;
-    window.setInterval(function() {
-      count = (count + 1) % 200;
-
-      var icons = linePath.get('icons');
-      icons[0].offset = (count / 2) + '%';
-      linePath.set('icons', icons);
-  }, 20);
-}
-
-function addLatLng(event){  
-    var path = polyg.getPath();
-    // Because path is an MVCArray, we can simply append a new coordinate
-    // and it will automatically appear.
-    path.push(event.latLng);
-    
-    console.log(path);
-}
-var linePath;
-function createPolyline(map,lineCoordinates,lineSymbol){
-    linePath = new google.maps.Polyline({
-    path: lineCoordinates,
-    geodesic: true,
-    strokeColor: '#FF0000',
-    strokeOpacity: 1.0,
-    strokeWeight: 2,
-    editable: true,
-     icons: [{ // this Array is for adding symbols to the line
-      icon: lineSymbol,
-      offset: '0',
-      repeat: '20px'
-    }]
-  });
-   linePath.setMap(map);
-}
-
-function createInfoWindow(text){
-  var infowindow = new google.maps.InfoWindow({
-    content: text
-  });
-  return infowindow;
-}
-
-function getCurrentPosition(e){
-  var markercoords = new google.maps.LatLng(e.latLng.lat(),e.latLng.lng());
-  return markercoords;
-}
-
-var marker;
-function createMarker(coords, map, title){
-    marker = new google.maps.Marker({
-    position: coords,
-    map: map,
-    title: title,
-    draggable: true,
-    animation: google.maps.Animation.DROP
-  });
-    return marker;
-}
-function createCustomMarker(coords,map,title){
-    marker = new google.maps.Marker({
-    position: coords,
-    map: map,
-    title: title,
-    icon: createImage("/assets/icon.png"),
-    draggable: true,
-    animation: google.maps.Animation.DROP
-  }); 
-    return marker;
-}
-
-function createImage(url){
-    var image = {
-    url: url,
-    // This marker is 20 pixels wide by 32 pixels tall.
-    size: new google.maps.Size(32, 32),
-    // The origin for this image is 0,0.
-    origin: new google.maps.Point(0,0),
-    // The anchor for this image is the base of the flagpole at 0,32.
-    anchor: new google.maps.Point(0, 32)
-  };
-  return image;
-}
-
-
 function loadScript() {
 	console.log("map loading ...");
   var script = document.createElement('script');
