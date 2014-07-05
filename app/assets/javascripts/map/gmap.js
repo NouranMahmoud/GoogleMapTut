@@ -3,39 +3,19 @@ $(window).load(function() {
 });
 
 var map;
-var poly;
-function initialize() {
 
-  var mapstyle = [
-                    {
-                      "featureType": "administrative.locality",
-                      "elementType": "labels.icon",
-                      "stylers": [
-                        { "invert_lightness": true },
-                        { "color": "#e40952" },
-                        { "visibility": "on" }
-                      ]
-                    },{
-                      "featureType": "water",
-                      "elementType": "geometry.fill",
-                      "stylers": [
-                        { "visibility": "on" },
-                        { "hue": "#5eff00" },
-                        { "color": "#282744" },
-                        { "weight": 0.1 },
-                        { "saturation": -56 },
-                        { "lightness": 22 },
-                        { "gamma": 3.91 }
-                      ]
-                    }
-                  ]
-  var styledMap = new google.maps.StyledMapType(mapstyle,{name: "styled map"});
+function initialize() {
+       
   var mapOptions = {
           center: new google.maps.LatLng(30.055487, 31.279766),
           zoom: 8,
           mapTypeId: google.maps.MapTypeId.NORMAL,
           panControl: true,
-            mapTypeControlOptions: {
+          zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.SMALL,
+            position: google.maps.ControlPosition.LEFT_CENTER
+          },
+          mapTypeControlOptions: {
             style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
             mapTypeIds: [google.maps.MapTypeId.ROADMAP, "map_style"]
           },
@@ -43,11 +23,50 @@ function initialize() {
           streetViewControl: true,
           overviewMapControl: true
         };
-        // initializing map
-        map = new google.maps.Map(document.getElementById("map-canvas"),mapOptions);
-        map.mapTypes.set("map_style",styledMap);
-        map.setMapTypeId("map_style");
- }
+  // initializing map
+  map = new google.maps.Map(document.getElementById("map-canvas"),mapOptions);
+  //default control constructed by inner css
+  var homeControlDiv = document.createElement('div');
+  var homeControl = new HomeControl(homeControlDiv, map);
+  homeControlDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(homeControlDiv);
+  // control constructed by outer css
+  var controlDiv =$("#control-div");
+  var controlUI = $("#control-ui");
+  var controlText = $("#control-text");
+  controlUI.click(function() {
+    map.setZoom(11);
+  });
+  controlDiv.index = 1;
+  map.controls[google.maps.ControlPosition.TOP_RIGHT].push(controlDiv[0]);
+
+}
+
+function HomeControl(controlDiv, map) {
+ controlDiv.style.padding = '5px';
+  
+  var controlUI = document.createElement('div');
+  controlUI.style.backgroundColor = 'white';
+  controlUI.style.borderStyle = 'solid';
+  controlUI.style.borderWidth = '2px';
+  controlUI.style.cursor = 'pointer';
+  controlUI.style.textAlign = 'center';
+  controlUI.title = 'Click to set the map to zoom level 11';
+  controlDiv.appendChild(controlUI);
+
+  var controlText = document.createElement('div');
+  controlText.style.fontFamily = 'Arial,sans-serif';
+  controlText.style.fontSize = '12px';
+  controlText.style.paddingLeft = '4px';
+  controlText.style.paddingRight = '4px';
+  controlText.innerHTML = '<b>Fullscreen</b>';
+  controlUI.appendChild(controlText);
+  google.maps.event.addDomListener(controlUI, 'click', function() {
+    $("#map-canvas").toggleClass("fullscreen");
+    google.maps.event.trigger(map , 'resize');
+    controlText.innerHTML = $("#map-canvas").hasClass("fullscreen")? '<b>Normal Screen</b>':'<b>FullScreen</b>';
+  });
+}
 
 function loadScript() {
 	console.log("map loading ...");

@@ -509,6 +509,9 @@ img{
   padding: 4px 4px;
 }
 .fullscreen{
-  width: 1000px;
-  height: 700px;
+  position: fixed !important;
+  height: 100% !important;
+  left: 0;
+  top: 0;
+  z-index: 100;
 }
