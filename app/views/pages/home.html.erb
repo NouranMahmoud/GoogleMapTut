@@ -1,13 +1,18 @@
 <% title("Home Page") %>
 <h1>Google Maps Tut</h1>
+<div id="search_options">
+  <%= link_to "Geocding search", geocoding_path, remote: true, id: "geocoding"%>
+  <%= link_to "Reverse geocding search", reverse_geocoding_path, remote: true, id: "reverse_geocoding"%>
+</div>
 <div id="map-container">
 	<div id="map-canvas"></div>
-    
-    <div id="control-div" class="control-div">
-      <div id= "control-ui" class="control-ui" title = "Click to set the map to Home">
-        <div id="control-text" class="control-text">
-          <p> Zoom </p>
-        </div>
-      </div>
-    </div>
+ 
+  <div id="geocoding_fields">
+    <%= text_field_tag :search, params[:search], placeholder: "Enter a place", :id => 'search_box_geocoding', class: 'search_box' %>
+    <%= button_tag "Search", id: "submit_button_geocoding", data: { disable_with: "Please wait..." }, class: "submit_button" %> 
+  </div>
+  <div id="reverse_geocoding_fields">
+    <%= text_field_tag :search, params[:search], placeholder: "Enter a point (latitude, longitude)", :id => 'search_box_reverse', class: 'search_box' %>
+    <%= button_tag "Search", id: "submit_button_reverse", data: { disable_with: "Please wait..." }, class: "submit_button" %> 
+  </div>
 </div>
