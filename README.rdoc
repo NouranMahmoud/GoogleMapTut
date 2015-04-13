@@ -1,5 +1,5 @@
 
-This is the [GoogleMapsTutorial](http://www.sitepoint.com/use-google-maps-rails/)
+This is the (GoogleMapsTutorial)[http://www.sitepoint.com/use-google-maps-rails/]
 You can show the geocodin part from this link (https://google-map-tut.herokuapp.com/)
 
 If you need any help, don't hesitate to ask me .. Have fun ;)
