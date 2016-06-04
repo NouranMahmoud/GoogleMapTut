@@ -38,7 +38,7 @@ function codeLatLng(geocoding){
   
   var latlngbounds = new google.maps.LatLngBounds();
   var listener;
-  var regex = /([1-9])+\.([1-9])+\,([1-9])+\.([1-9])+/g;
+  var regex = /([0-9])+\.([0-9])+\,([0-9])+\.([0-9])+/g;
   if(regex.test(input)) {
   var latLngStr = input.split(",",2);
   var lat = parseFloat(latLngStr[0]);
